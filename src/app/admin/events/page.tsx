@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { graphqlRequest } from "@/lib/graphql";
 
 interface Event {
@@ -45,7 +46,6 @@ const CREATE_EVENT = `
     $end_time: timestamptz!
     $location: String!
     $max_attendees: Int!
-    $created_by: String!
     $status: String!
     $is_private: Boolean!
   ) {
@@ -57,7 +57,6 @@ const CREATE_EVENT = `
         end_time: $end_time
         location: $location
         max_attendees: $max_attendees
-        created_by: $created_by
         status: $status
         is_private: $is_private
       }
@@ -89,9 +88,8 @@ export default function EventsPage() {
     start_time: "",
     end_time: "",
     location: "",
-    max_attendees: 0,
-    created_by: "admin@example.com",
-    status: "published",
+    max_attendees: 1,
+    status: "draft",
     is_private: false,
   });
 
@@ -119,7 +117,6 @@ export default function EventsPage() {
           ...newEvent,
           start_time: new Date(newEvent.start_time).toISOString(),
           end_time: new Date(newEvent.end_time).toISOString(),
-          max_attendees: parseInt(newEvent.max_attendees.toString()),
         }
       );
       setEvents([data.insert_events_one, ...events]);
@@ -130,9 +127,8 @@ export default function EventsPage() {
         start_time: "",
         end_time: "",
         location: "",
-        max_attendees: 0,
-        created_by: "admin@example.com",
-        status: "published",
+        max_attendees: 1,
+        status: "draft",
         is_private: false,
       });
     } catch (err) {
@@ -153,10 +149,10 @@ export default function EventsPage() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Events</h2>
         <button
-          onClick={() => setShowCreateForm(true)}
+          onClick={() => setShowCreateForm(!showCreateForm)}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          Create Event
+          {showCreateForm ? "Cancel" : "Create Event"}
         </button>
       </div>
 
@@ -167,24 +163,62 @@ export default function EventsPage() {
       )}
 
       {showCreateForm && (
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Create New Event
-          </h3>
-          <form onSubmit={handleCreateEvent} className="space-y-4">
+        <form
+          onSubmit={handleCreateEvent}
+          className="bg-white shadow rounded-lg p-6 space-y-4"
+        >
+          <div>
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={newEvent.title}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, title: e.target.value })
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              value={newEvent.description}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, description: e.target.value })
+              }
+              rows={3}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label
-                htmlFor="title"
+                htmlFor="start_time"
                 className="block text-sm font-medium text-gray-700"
               >
-                Title
+                Start Time
               </label>
               <input
-                type="text"
-                id="title"
-                value={newEvent.title}
+                type="datetime-local"
+                id="start_time"
+                value={newEvent.start_time}
                 onChange={(e) =>
-                  setNewEvent({ ...newEvent, title: e.target.value })
+                  setNewEvent({ ...newEvent, start_time: e.target.value })
                 }
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
@@ -193,197 +227,165 @@ export default function EventsPage() {
 
             <div>
               <label
-                htmlFor="description"
+                htmlFor="end_time"
                 className="block text-sm font-medium text-gray-700"
               >
-                Description
-              </label>
-              <textarea
-                id="description"
-                value={newEvent.description}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, description: e.target.value })
-                }
-                rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="start_time"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Start Time
-                </label>
-                <input
-                  type="datetime-local"
-                  id="start_time"
-                  value={newEvent.start_time}
-                  onChange={(e) =>
-                    setNewEvent({ ...newEvent, start_time: e.target.value })
-                  }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="end_time"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  End Time
-                </label>
-                <input
-                  type="datetime-local"
-                  id="end_time"
-                  value={newEvent.end_time}
-                  onChange={(e) =>
-                    setNewEvent({ ...newEvent, end_time: e.target.value })
-                  }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="location"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Location
+                End Time
               </label>
               <input
-                type="text"
-                id="location"
-                value={newEvent.location}
+                type="datetime-local"
+                id="end_time"
+                value={newEvent.end_time}
                 onChange={(e) =>
-                  setNewEvent({ ...newEvent, location: e.target.value })
+                  setNewEvent({ ...newEvent, end_time: e.target.value })
                 }
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
               />
             </div>
+          </div>
 
-            <div>
-              <label
-                htmlFor="max_attendees"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Maximum Attendees
-              </label>
-              <input
-                type="number"
-                id="max_attendees"
-                value={newEvent.max_attendees}
-                onChange={(e) =>
-                  setNewEvent({
-                    ...newEvent,
-                    max_attendees: parseInt(e.target.value),
-                  })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                required
-                min="1"
-              />
-            </div>
+          <div>
+            <label
+              htmlFor="location"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Location
+            </label>
+            <input
+              type="text"
+              id="location"
+              value={newEvent.location}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, location: e.target.value })
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            />
+          </div>
 
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => setShowCreateForm(false)}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Create Event
-              </button>
-            </div>
-          </form>
-        </div>
+          <div>
+            <label
+              htmlFor="max_attendees"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Maximum Attendees
+            </label>
+            <input
+              type="number"
+              id="max_attendees"
+              value={newEvent.max_attendees}
+              onChange={(e) =>
+                setNewEvent({
+                  ...newEvent,
+                  max_attendees: parseInt(e.target.value),
+                })
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+              min="1"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="status"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Status
+            </label>
+            <select
+              id="status"
+              value={newEvent.status}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, status: e.target.value })
+              }
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            >
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="is_private"
+              checked={newEvent.is_private}
+              onChange={(e) =>
+                setNewEvent({ ...newEvent, is_private: e.target.checked })
+              }
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            />
+            <label
+              htmlFor="is_private"
+              className="ml-2 block text-sm text-gray-900"
+            >
+              Private Event
+            </label>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Create Event
+            </button>
+          </div>
+        </form>
       )}
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <ul className="divide-y divide-gray-200">
           {events.map((event) => (
             <li key={event.id}>
-              <div className="px-4 py-4 sm:px-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium text-indigo-600 truncate">
-                      {event.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {event.description}
-                    </p>
+              <Link
+                href={`/admin/events/${event.id}`}
+                className="block hover:bg-gray-50"
+              >
+                <div className="px-4 py-4 sm:px-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-indigo-600 truncate">
+                        {event.title}
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {event.description}
+                      </p>
+                    </div>
+                    <div className="ml-2 flex-shrink-0 flex">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          event.status === "published"
+                            ? "bg-green-100 text-green-800"
+                            : event.status === "cancelled"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {event.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="ml-2 flex-shrink-0 flex">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      {event.status}
-                    </span>
+                  <div className="mt-2 sm:flex sm:justify-between">
+                    <div className="sm:flex">
+                      <p className="flex items-center text-sm text-gray-500">
+                        {new Date(event.start_time).toLocaleString()} -{" "}
+                        {new Date(event.end_time).toLocaleString()}
+                      </p>
+                      <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                        {event.location}
+                      </p>
+                    </div>
+                    <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <p>Max attendees: {event.max_attendees}</p>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-2 sm:flex sm:justify-between">
-                  <div className="sm:flex">
-                    <p className="flex items-center text-sm text-gray-500">
-                      <svg
-                        className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {new Date(event.start_time).toLocaleString()} -{" "}
-                      {new Date(event.end_time).toLocaleString()}
-                    </p>
-                    <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                      <svg
-                        className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {event.location}
-                    </p>
-                  </div>
-                  <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <svg
-                      className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <p>
-                      Created {new Date(event.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              </Link>
             </li>
           ))}
         </ul>

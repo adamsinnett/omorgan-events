@@ -50,12 +50,12 @@
   - [x] Form validation
   - [x] Date/time picker
   - [x] Location input
-- [ ] Implement event management dashboard
-  - [ ] Event details view
-  - [ ] RSVP management
-  - [ ] Message moderation
-  - [ ] Event editing
-  - [ ] Event deletion
+- [x] Implement event management dashboard
+  - [x] Event details view
+  - [x] RSVP management
+  - [x] Message moderation
+  - [x] Event editing
+  - [x] Event deletion
 
 ## Event Pages
 
