@@ -1,8 +1,8 @@
-import { env } from "../lib/env";
+import { env, publicEnv } from "../lib/env";
 
 async function testHasuraConnection() {
   try {
-    const response = await fetch(env.NEXT_PUBLIC_HASURA_URL!, {
+    const response = await fetch(publicEnv.NEXT_PUBLIC_HASURA_URL!, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

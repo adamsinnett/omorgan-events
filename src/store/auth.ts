@@ -149,7 +149,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             token,
           });
-        } catch (error) {
+        } catch {
           set({ isAuthenticated: false, user: null, token: null });
         }
       },
