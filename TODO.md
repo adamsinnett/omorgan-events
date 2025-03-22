@@ -6,7 +6,7 @@
 - [x] Set up Tailwind UI
 - [x] Configure Zustand for state management
 - [x] Set up Tanstack Query
-- [ ] Set up a Neon database
+- [x] Set up a Neon database
 - [ ] Create Hasura project
   - [ ] Link Hasura to Neon
 - [ ] Set up development environment
