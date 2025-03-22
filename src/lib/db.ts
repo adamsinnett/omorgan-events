@@ -1,7 +1,9 @@
 import { Pool } from "pg";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is not defined");
+  throw new Error(
+    "DATABASE_URL is not defined. Please ensure you have a .env.local file with DATABASE_URL set."
+  );
 }
 
 const pool = new Pool({
