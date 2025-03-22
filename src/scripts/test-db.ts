@@ -1,3 +1,9 @@
+import { config } from "dotenv";
+import { join } from "path";
+
+// Load environment variables from .env.local
+config({ path: join(process.cwd(), ".env.local") });
+
 import { query } from "../lib/db";
 
 async function testConnection() {
