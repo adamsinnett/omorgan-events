@@ -6,7 +6,9 @@
 - [ ] Set up Tailwind UI
 - [ ] Configure Zustand for state management
 - [ ] Set up Tanstack Query
+- [ ] Set up a Neon database
 - [ ] Create Hasura project
+  - [ ] Link Hasura to Neon
 - [ ] Set up development environment
 - [ ] Configure environment variables
 - [ ] Set up CI/CD pipeline
