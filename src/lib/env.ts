@@ -14,6 +14,19 @@ export const env = {
 } as const;
 
 // Validate required environment variables
-if (!env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is not defined in .env.local");
+const requiredEnvVars = {
+  DATABASE_URL: env.DATABASE_URL,
+  NEXT_PUBLIC_HASURA_URL: env.NEXT_PUBLIC_HASURA_URL,
+  HASURA_ADMIN_SECRET: env.HASURA_ADMIN_SECRET,
+} as const;
+
+// Check for missing environment variables
+const missingEnvVars = Object.entries(requiredEnvVars)
+  .filter(([, value]) => !value)
+  .map(([key]) => key);
+
+if (missingEnvVars.length > 0) {
+  throw new Error(
+    `Missing required environment variables: ${missingEnvVars.join(", ")}`
+  );
 }
