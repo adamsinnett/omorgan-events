@@ -8,6 +8,10 @@ export function generateInvitationToken(): string {
 }
 
 export function getInvitationUrl(token: string): string {
-  // In production, this would use the actual domain
-  return `http://localhost:3000/events/${token}`;
+  // Use the current domain
+  const baseUrl =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  return `${baseUrl}/events/${token}`;
 }
