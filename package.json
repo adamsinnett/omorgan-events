@@ -13,8 +13,11 @@
   "dependencies": {
     "@tanstack/react-query": "^5.69.0",
     "@tanstack/react-query-devtools": "^5.69.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/pg": "^8.11.11",
+    "bcryptjs": "^3.0.2",
     "dotenv": "^16.4.7",
+    "jose": "^6.0.10",
     "next": "15.2.3",
     "pg": "^8.14.1",
     "react": "^19.0.0",
