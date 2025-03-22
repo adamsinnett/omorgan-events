@@ -1,13 +1,8 @@
 import { Pool } from "pg";
-
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL is not defined. Please ensure you have a .env.local file with DATABASE_URL set."
-  );
-}
+import { env } from "./env";
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false, // Required for Neon's SSL connection
   },
