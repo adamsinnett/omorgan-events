@@ -1,6 +1,11 @@
+"use client";
+
+import { useStore } from "@/store";
 import Image from "next/image";
 
 export default function Home() {
+  const { isAdmin, setAdmin } = useStore();
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -49,6 +54,19 @@ export default function Home() {
           >
             Read our docs
           </a>
+        </div>
+
+        <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
+          <h1 className="text-4xl font-bold mb-8">Omorgan Events</h1>
+          <div className="mb-4">
+            <p>Admin Status: {isAdmin ? "Admin" : "Not Admin"}</p>
+            <button
+              onClick={() => setAdmin(!isAdmin)}
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Toggle Admin
+            </button>
+          </div>
         </div>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
