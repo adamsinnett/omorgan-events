@@ -135,7 +135,7 @@ export const useAuthStore = create<AuthState>()(
           const adminUser = data.admin_users[0];
 
           if (!adminUser || !adminUser.is_active) {
-            set({ isAuthenticated: false, user: null });
+            set({ isAuthenticated: false, user: null, token: null });
             return;
           }
 
@@ -147,9 +147,10 @@ export const useAuthStore = create<AuthState>()(
               lastLoginAt: adminUser.last_login_at,
             },
             isAuthenticated: true,
+            token,
           });
         } catch (error) {
-          set({ isAuthenticated: false, user: null });
+          set({ isAuthenticated: false, user: null, token: null });
         }
       },
     }),

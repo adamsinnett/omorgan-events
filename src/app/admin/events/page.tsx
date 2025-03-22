@@ -7,13 +7,15 @@ interface Event {
   id: string;
   title: string;
   description: string;
-  start_date: string;
-  end_date: string;
+  start_time: string;
+  end_time: string;
   location: string;
   max_attendees: number;
-  current_attendees: number;
   created_at: string;
   updated_at: string;
+  created_by: string;
+  status: string;
+  is_private: boolean;
 }
 
 const GET_EVENTS = `
@@ -22,13 +24,15 @@ const GET_EVENTS = `
       id
       title
       description
-      start_date
-      end_date
+      start_time
+      end_time
       location
       max_attendees
-      current_attendees
       created_at
       updated_at
+      created_by
+      status
+      is_private
     }
   }
 `;
@@ -37,31 +41,39 @@ const CREATE_EVENT = `
   mutation CreateEvent(
     $title: String!
     $description: String!
-    $start_date: timestamptz!
-    $end_date: timestamptz!
+    $start_time: timestamptz!
+    $end_time: timestamptz!
     $location: String!
     $max_attendees: Int!
+    $created_by: String!
+    $status: String!
+    $is_private: Boolean!
   ) {
     insert_events_one(
       object: {
         title: $title
         description: $description
-        start_date: $start_date
-        end_date: $end_date
+        start_time: $start_time
+        end_time: $end_time
         location: $location
         max_attendees: $max_attendees
+        created_by: $created_by
+        status: $status
+        is_private: $is_private
       }
     ) {
       id
       title
       description
-      start_date
-      end_date
+      start_time
+      end_time
       location
       max_attendees
-      current_attendees
       created_at
       updated_at
+      created_by
+      status
+      is_private
     }
   }
 `;
@@ -74,10 +86,13 @@ export default function EventsPage() {
   const [newEvent, setNewEvent] = useState({
     title: "",
     description: "",
-    start_date: "",
-    end_date: "",
+    start_time: "",
+    end_time: "",
     location: "",
     max_attendees: 0,
+    created_by: "admin@example.com",
+    status: "published",
+    is_private: false,
   });
 
   const fetchEvents = async () => {
@@ -102,8 +117,8 @@ export default function EventsPage() {
         CREATE_EVENT,
         {
           ...newEvent,
-          start_date: new Date(newEvent.start_date).toISOString(),
-          end_date: new Date(newEvent.end_date).toISOString(),
+          start_time: new Date(newEvent.start_time).toISOString(),
+          end_time: new Date(newEvent.end_time).toISOString(),
           max_attendees: parseInt(newEvent.max_attendees.toString()),
         }
       );
@@ -112,10 +127,13 @@ export default function EventsPage() {
       setNewEvent({
         title: "",
         description: "",
-        start_date: "",
-        end_date: "",
+        start_time: "",
+        end_time: "",
         location: "",
         max_attendees: 0,
+        created_by: "admin@example.com",
+        status: "published",
+        is_private: false,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create event");
@@ -195,17 +213,17 @@ export default function EventsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label
-                  htmlFor="start_date"
+                  htmlFor="start_time"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Start Date
+                  Start Time
                 </label>
                 <input
                   type="datetime-local"
-                  id="start_date"
-                  value={newEvent.start_date}
+                  id="start_time"
+                  value={newEvent.start_time}
                   onChange={(e) =>
-                    setNewEvent({ ...newEvent, start_date: e.target.value })
+                    setNewEvent({ ...newEvent, start_time: e.target.value })
                   }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   required
@@ -214,17 +232,17 @@ export default function EventsPage() {
 
               <div>
                 <label
-                  htmlFor="end_date"
+                  htmlFor="end_time"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  End Date
+                  End Time
                 </label>
                 <input
                   type="datetime-local"
-                  id="end_date"
-                  value={newEvent.end_date}
+                  id="end_time"
+                  value={newEvent.end_time}
                   onChange={(e) =>
-                    setNewEvent({ ...newEvent, end_date: e.target.value })
+                    setNewEvent({ ...newEvent, end_time: e.target.value })
                   }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   required
@@ -309,8 +327,7 @@ export default function EventsPage() {
                   </div>
                   <div className="ml-2 flex-shrink-0 flex">
                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      {event.current_attendees} / {event.max_attendees}{" "}
-                      attendees
+                      {event.status}
                     </span>
                   </div>
                 </div>
@@ -329,8 +346,8 @@ export default function EventsPage() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      {new Date(event.start_date).toLocaleString()} -{" "}
-                      {new Date(event.end_date).toLocaleString()}
+                      {new Date(event.start_time).toLocaleString()} -{" "}
+                      {new Date(event.end_time).toLocaleString()}
                     </p>
                     <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
                       <svg

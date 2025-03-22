@@ -17,6 +17,7 @@ export const env = {
 // Client-side variables (must be prefixed with NEXT_PUBLIC_)
 export const publicEnv = {
   NEXT_PUBLIC_HASURA_URL: process.env.NEXT_PUBLIC_HASURA_URL,
+  NEXT_PUBLIC_JWT_SECRET: process.env.NEXT_PUBLIC_JWT_SECRET,
 } as const;
 
 // Validate required environment variables
@@ -27,6 +28,7 @@ const requiredEnvVars = {
 
 const requiredPublicEnvVars = {
   NEXT_PUBLIC_HASURA_URL: publicEnv.NEXT_PUBLIC_HASURA_URL,
+  NEXT_PUBLIC_JWT_SECRET: publicEnv.NEXT_PUBLIC_JWT_SECRET,
 } as const;
 
 // Check for missing environment variables

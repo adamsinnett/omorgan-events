@@ -10,7 +10,8 @@
     "test-db": "tsx src/scripts/test-db.ts",
     "test-hasura": "tsx src/scripts/test-hasura.ts",
     "create-admin": "tsx src/scripts/create-admin.ts",
-    "update-admin-password": "tsx src/scripts/update-admin-password.ts"
+    "update-admin-password": "tsx src/scripts/update-admin-password.ts",
+    "create-sample-events": "tsx src/scripts/create-sample-events.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.69.0",

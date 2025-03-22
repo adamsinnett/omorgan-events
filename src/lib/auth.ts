@@ -1,10 +1,9 @@
 import { jwtVerify, SignJWT } from "jose";
 import bcrypt from "bcryptjs";
 import { JWTClaims } from "@/types/auth";
+import { publicEnv } from "./env";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "your-secret-key"
-);
+const JWT_SECRET = new TextEncoder().encode(publicEnv.NEXT_PUBLIC_JWT_SECRET);
 
 export async function generateToken(claims: Omit<JWTClaims, "iat" | "exp">) {
   const token = await new SignJWT(claims)
