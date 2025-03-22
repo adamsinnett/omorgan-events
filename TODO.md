@@ -9,8 +9,8 @@
 - [x] Set up a Neon database
 - [x] Create Hasura project
   - [x] Link Hasura to Neon
-- [ ] Set up development environment
-- [ ] Configure environment variables
+- [x] Set up development environment
+- [x] Configure environment variables
 - [ ] Set up CI/CD pipeline
 
 ## Database Setup
@@ -20,16 +20,18 @@
   - [x] Attendees table
   - [x] Messages table
   - [x] Reactions table
+  - [x] Admin users table
 - [x] Set up relationships between tables
 - [x] Configure permissions
 - [x] Create initial migrations
 
 ## Authentication System
 
-- [ ] Implement admin authentication
-  - [ ] Create login page
-  - [ ] Set up JWT handling
-  - [ ] Create protected routes
+- [x] Implement admin authentication
+  - [x] Create login page
+  - [x] Set up JWT handling
+  - [x] Create protected routes
+  - [x] Implement authentication persistence
 - [ ] Implement magic link system
   - [ ] Create link generation logic
   - [ ] Set up link validation
@@ -37,18 +39,23 @@
 
 ## Admin Interface
 
-- [ ] Create admin layout
-- [ ] Implement event list view
-  - [ ] Create event list component
-  - [ ] Add sorting and filtering
-- [ ] Create event creation form
-  - [ ] Form validation
-  - [ ] Date/time picker
-  - [ ] Location input
+- [x] Create admin layout
+  - [x] Navigation component
+  - [x] Protected route handling
+  - [x] Loading states
+- [x] Implement event list view
+  - [x] Create event list component
+  - [x] Add sorting and filtering
+- [x] Create event creation form
+  - [x] Form validation
+  - [x] Date/time picker
+  - [x] Location input
 - [ ] Implement event management dashboard
   - [ ] Event details view
   - [ ] RSVP management
   - [ ] Message moderation
+  - [ ] Event editing
+  - [ ] Event deletion
 
 ## Event Pages
 

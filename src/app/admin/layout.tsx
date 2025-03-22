@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
+import { Navigation } from "@/components/admin/Navigation";
 
 export default function AdminLayout({
   children,
@@ -14,8 +15,13 @@ export default function AdminLayout({
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    const validateAuth = async () => {
+      if (pathname !== "/admin/login") {
+        await checkAuth();
+      }
+    };
+    validateAuth();
+  }, [pathname, checkAuth]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated && pathname !== "/admin/login") {
@@ -35,5 +41,16 @@ export default function AdminLayout({
     return null;
   }
 
-  return <>{children}</>;
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  return (
+    <>
+      <Navigation />
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">{children}</div>
+      </main>
+    </>
+  );
 }

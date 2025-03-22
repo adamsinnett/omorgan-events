@@ -1,47 +1,93 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AuthState, AdminUser, LoginCredentials } from "@/types/auth";
 import { generateToken, verifyToken } from "@/lib/auth";
+import { graphqlRequest } from "@/lib/graphql";
+import { LOGIN_ADMIN, UPDATE_LAST_LOGIN } from "@/lib/queries";
+import { comparePasswords } from "@/lib/auth";
+import { JWTClaims } from "@/types/auth";
 
-interface AuthStore extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<void>;
+interface User {
+  id: string;
+  email: string;
+  isActive: boolean;
+  lastLoginAt: string | null;
+}
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isLoading: boolean;
+  error: string | null;
+  isAuthenticated: boolean;
+  login: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthStore>()(
+export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
-      isAuthenticated: false,
-      isLoading: true,
+      token: null,
+      isLoading: false,
       error: null,
+      isAuthenticated: false,
 
-      login: async (credentials) => {
+      login: async ({ email, password }) => {
+        set({ isLoading: true, error: null });
+
         try {
-          set({ isLoading: true, error: null });
+          // Query admin user by email
+          const { data } = await graphqlRequest<{
+            admin_users: Array<{
+              id: string;
+              email: string;
+              password_hash: string;
+              is_active: boolean;
+              last_login_at: string | null;
+            }>;
+          }>(LOGIN_ADMIN, { email });
 
-          // TODO: Implement actual login logic with Hasura
-          // For now, we'll just simulate a successful login
-          const mockUser: AdminUser = {
-            id: "1",
-            email: credentials.email,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            lastLoginAt: new Date().toISOString(),
-            isActive: true,
-          };
+          const adminUser = data.admin_users[0];
 
-          const token = await generateToken({
-            sub: mockUser.id,
-            email: mockUser.email,
+          if (!adminUser) {
+            throw new Error("Invalid email or password");
+          }
+
+          // Verify password
+          const isValidPassword = await comparePasswords(
+            password,
+            adminUser.password_hash
+          );
+
+          if (!isValidPassword) {
+            throw new Error("Invalid email or password");
+          }
+
+          if (!adminUser.is_active) {
+            throw new Error("Account is deactivated");
+          }
+
+          // Update last login
+          await graphqlRequest(UPDATE_LAST_LOGIN, { id: adminUser.id });
+
+          // Generate JWT token
+          const claims: Omit<JWTClaims, "iat" | "exp"> = {
+            id: adminUser.id,
+            email: adminUser.email,
             role: "admin",
-          });
+          };
+          const token = await generateToken(claims);
 
-          localStorage.setItem("token", token);
-
+          // Update state
           set({
-            user: mockUser,
+            user: {
+              id: adminUser.id,
+              email: adminUser.email,
+              isActive: adminUser.is_active,
+              lastLoginAt: adminUser.last_login_at,
+            },
+            token,
             isAuthenticated: true,
             isLoading: false,
           });
@@ -54,54 +100,66 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       logout: () => {
-        localStorage.removeItem("token");
         set({
           user: null,
+          token: null,
           isAuthenticated: false,
           error: null,
         });
       },
 
       checkAuth: async () => {
-        try {
-          set({ isLoading: true, error: null });
+        const { token } = get();
+        if (!token) {
+          set({ isAuthenticated: false, user: null });
+          return;
+        }
 
-          const token = localStorage.getItem("token");
-          if (!token) {
-            set({ isLoading: false });
+        try {
+          const claims = await verifyToken(token);
+          if (!claims) {
+            set({ isAuthenticated: false, user: null });
             return;
           }
 
-          const claims = await verifyToken(token);
+          // Query user data
+          const { data } = await graphqlRequest<{
+            admin_users: Array<{
+              id: string;
+              email: string;
+              is_active: boolean;
+              last_login_at: string | null;
+            }>;
+          }>(LOGIN_ADMIN, { email: claims.email });
 
-          // TODO: Fetch user data from Hasura using claims.sub
-          // For now, we'll just create a mock user
-          const mockUser: AdminUser = {
-            id: claims.sub,
-            email: claims.email,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            lastLoginAt: new Date().toISOString(),
-            isActive: true,
-          };
+          const adminUser = data.admin_users[0];
+
+          if (!adminUser || !adminUser.is_active) {
+            set({ isAuthenticated: false, user: null });
+            return;
+          }
 
           set({
-            user: mockUser,
+            user: {
+              id: adminUser.id,
+              email: adminUser.email,
+              isActive: adminUser.is_active,
+              lastLoginAt: adminUser.last_login_at,
+            },
             isAuthenticated: true,
-            isLoading: false,
           });
-        } catch {
-          localStorage.removeItem("token");
-          set({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false,
-          });
+        } catch (error) {
+          set({ isAuthenticated: false, user: null });
         }
       },
     }),
     {
       name: "auth-storage",
+      partialize: (state) => ({
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+        user: state.user,
+      }),
     }
   )
 );

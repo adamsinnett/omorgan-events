@@ -20,9 +20,9 @@ export interface AuthState {
 }
 
 export interface JWTClaims {
-  sub: string; // user id
+  id: string;
   email: string;
-  role: "admin";
+  role: string;
   iat: number;
   exp: number;
 }
