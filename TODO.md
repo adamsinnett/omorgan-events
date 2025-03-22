@@ -7,22 +7,22 @@
 - [x] Configure Zustand for state management
 - [x] Set up Tanstack Query
 - [x] Set up a Neon database
-- [ ] Create Hasura project
-  - [ ] Link Hasura to Neon
+- [x] Create Hasura project
+  - [x] Link Hasura to Neon
 - [ ] Set up development environment
 - [ ] Configure environment variables
 - [ ] Set up CI/CD pipeline
 
 ## Database Setup
 
-- [ ] Create database schema in Hasura
-  - [ ] Events table
-  - [ ] Attendees table
-  - [ ] Messages table
-  - [ ] Reactions table
-- [ ] Set up relationships between tables
-- [ ] Configure permissions
-- [ ] Create initial migrations
+- [x] Create database schema in Hasura
+  - [x] Events table
+  - [x] Attendees table
+  - [x] Messages table
+  - [x] Reactions table
+- [x] Set up relationships between tables
+- [x] Configure permissions
+- [x] Create initial migrations
 
 ## Authentication System
 
