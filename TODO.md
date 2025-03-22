@@ -5,7 +5,7 @@
 - [x] Create Next.js project with App Router
 - [x] Set up Tailwind UI
 - [x] Configure Zustand for state management
-- [ ] Set up Tanstack Query
+- [x] Set up Tanstack Query
 - [ ] Set up a Neon database
 - [ ] Create Hasura project
   - [ ] Link Hasura to Neon
