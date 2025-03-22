@@ -69,7 +69,6 @@ const GET_EVENT = `
         id
         token
         created_at
-        expires_at
         is_active
       }
     }
@@ -125,7 +124,6 @@ const UPDATE_EVENT = `
         id
         token
         created_at
-        expires_at
         is_active
       }
     }
