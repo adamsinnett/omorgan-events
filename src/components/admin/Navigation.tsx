@@ -1,14 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 
 export function Navigation() {
-  const pathname = usePathname();
   const { logout } = useAuthStore();
-
-  const isActive = (path: string) => pathname === path;
 
   return (
     <nav className="bg-white shadow-sm">
@@ -18,28 +14,6 @@ export function Navigation() {
             <div className="flex-shrink-0 flex items-center">
               <Link href="/admin" className="text-xl font-bold text-indigo-600">
                 Admin Dashboard
-              </Link>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                href="/admin"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  isActive("/admin")
-                    ? "border-indigo-500 text-gray-900"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                }`}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/admin/events"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  isActive("/admin/events")
-                    ? "border-indigo-500 text-gray-900"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                }`}
-              >
-                Events
               </Link>
             </div>
           </div>
