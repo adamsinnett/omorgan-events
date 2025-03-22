@@ -47,7 +47,8 @@ VALUES
     ('public', 'events', 'Events table', false),
     ('public', 'attendees', 'Event attendees table', false),
     ('public', 'messages', 'Event messages table', false),
-    ('public', 'reactions', 'Message reactions table', false)
+    ('public', 'reactions', 'Message reactions table', false),
+    ('public', 'invitations', 'Event invitations table', false)
 ON CONFLICT (table_schema, table_name) DO NOTHING;
 
 -- Set up relationships
@@ -57,6 +58,8 @@ VALUES
     ('public', 'events', 'attendees', 'array', '{"foreign_key_constraint_on": "attendees.event_id"}'),
     -- Events to Messages
     ('public', 'events', 'messages', 'array', '{"foreign_key_constraint_on": "messages.event_id"}'),
+    -- Events to Invitations
+    ('public', 'events', 'invitations', 'array', '{"foreign_key_constraint_on": "invitations.event_id"}'),
     -- Messages to Reactions
     ('public', 'messages', 'reactions', 'array', '{"foreign_key_constraint_on": "reactions.message_id"}'),
     -- Messages to Parent Messages (self-referential)
@@ -105,7 +108,17 @@ VALUES
     ('public', 'reactions', 'user', 'select', '{"filter": {}}'),
     ('public', 'reactions', 'user', 'insert', '{"check": {"user_email": {"_eq": "X-Hasura-User-Email"}}}'),
     ('public', 'reactions', 'user', 'update', '{"check": {"user_email": {"_eq": "X-Hasura-User-Email"}}}'),
-    ('public', 'reactions', 'user', 'delete', '{"check": {"user_email": {"_eq": "X-Hasura-User-Email"}}}')
+    ('public', 'reactions', 'user', 'delete', '{"check": {"user_email": {"_eq": "X-Hasura-User-Email"}}}'),
+
+    -- Invitations permissions
+    ('public', 'invitations', 'admin', 'select', '{"filter": {}}'),
+    ('public', 'invitations', 'admin', 'insert', '{"check": {}}'),
+    ('public', 'invitations', 'admin', 'update', '{"check": {}}'),
+    ('public', 'invitations', 'admin', 'delete', '{"check": {}}'),
+    ('public', 'invitations', 'user', 'select', '{"filter": {"created_by": {"_eq": "X-Hasura-User-Email"}}}'),
+    ('public', 'invitations', 'user', 'insert', '{"check": {"created_by": {"_eq": "X-Hasura-User-Email"}}}'),
+    ('public', 'invitations', 'user', 'update', '{"check": {"created_by": {"_eq": "X-Hasura-User-Email"}}}'),
+    ('public', 'invitations', 'user', 'delete', '{"check": {"created_by": {"_eq": "X-Hasura-User-Email"}}}')
 ON CONFLICT (table_schema, table_name, role_name, perm_type) DO NOTHING;
 
 -- Create relationships
@@ -125,6 +138,10 @@ ALTER TABLE reactions
 ADD CONSTRAINT reactions_message_id_fkey
 FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE;
 
+ALTER TABLE invitations
+ADD CONSTRAINT invitations_event_id_fkey
+FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE;
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_events_created_by ON events(created_by);
 CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
@@ -134,4 +151,7 @@ CREATE INDEX IF NOT EXISTS idx_attendees_email ON attendees(email);
 CREATE INDEX IF NOT EXISTS idx_messages_event_id ON messages(event_id);
 CREATE INDEX IF NOT EXISTS idx_messages_parent_id ON messages(parent_id);
 CREATE INDEX IF NOT EXISTS idx_reactions_message_id ON reactions(message_id);
-CREATE INDEX IF NOT EXISTS idx_reactions_user_email ON reactions(user_email); 
+CREATE INDEX IF NOT EXISTS idx_reactions_user_email ON reactions(user_email);
+CREATE INDEX IF NOT EXISTS idx_invitations_event_id ON invitations(event_id);
+CREATE INDEX IF NOT EXISTS idx_invitations_token ON invitations(token);
+CREATE INDEX IF NOT EXISTS idx_invitations_expires_at ON invitations(expires_at); 

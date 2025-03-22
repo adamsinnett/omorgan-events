@@ -32,10 +32,10 @@
   - [x] Set up JWT handling
   - [x] Create protected routes
   - [x] Implement authentication persistence
-- [ ] Implement magic link system
-  - [ ] Create link generation logic
-  - [ ] Set up link validation
-  - [ ] Create attendee session management
+- [x] Implement magic link system
+  - [x] Create link generation logic
+  - [x] Set up link validation
+  - [x] Create attendee session management
 
 ## Admin Interface
 

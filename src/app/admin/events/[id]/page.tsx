@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { graphqlRequest } from "@/lib/graphql";
+import { generateInvitationToken, getInvitationUrl } from "@/lib/invitations";
 
 interface Event {
   id: string;
@@ -17,6 +18,8 @@ interface Event {
   created_by: string;
   status: string;
   is_private: boolean;
+  attendees: Attendee[];
+  invitations: Invitation[];
 }
 
 interface Attendee {
@@ -26,6 +29,17 @@ interface Attendee {
   status: string;
   guest_count: number;
   created_at: string;
+}
+
+interface Invitation {
+  id: string;
+  token: string;
+  created_at: string;
+  is_active: boolean;
+}
+
+interface EventResponse {
+  events_by_pk: Event;
 }
 
 const GET_EVENT = `
@@ -45,11 +59,18 @@ const GET_EVENT = `
       is_private
       attendees {
         id
-        email
         name
+        email
         status
         guest_count
         created_at
+      }
+      invitations {
+        id
+        token
+        created_at
+        expires_at
+        is_active
       }
     }
   }
@@ -100,6 +121,13 @@ const UPDATE_EVENT = `
         guest_count
         created_at
       }
+      invitations {
+        id
+        token
+        created_at
+        expires_at
+        is_active
+      }
     }
   }
 `;
@@ -112,6 +140,32 @@ const DELETE_EVENT = `
   }
 `;
 
+const CREATE_INVITATION = `
+  mutation CreateInvitation($event_id: uuid!, $token: String!) {
+    insert_invitations_one(
+      object: {
+        event_id: $event_id
+        token: $token
+        created_by: "admin"
+        is_active: true
+      }
+    ) {
+      id
+      token
+      created_at
+      is_active
+    }
+  }
+`;
+
+const DELETE_INVITATION = `
+  mutation DeleteInvitation($id: uuid!) {
+    delete_invitations_by_pk(id: $id) {
+      id
+    }
+  }
+`;
+
 export default function EventDetailsPage() {
   const params = useParams();
   const [event, setEvent] = useState<Event | null>(null);
@@ -119,13 +173,20 @@ export default function EventDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedEvent, setEditedEvent] = useState<Partial<Event>>({});
+  const [newInvitation, setNewInvitation] = useState<Invitation | null>(null);
 
   const fetchEvent = async () => {
     try {
-      const { data } = await graphqlRequest<{ events_by_pk: Event }>(
-        GET_EVENT,
-        { id: params.id }
-      );
+      const { data } = await graphqlRequest<EventResponse>(GET_EVENT, {
+        id: params.id,
+      });
+
+      if (!data.events_by_pk) {
+        setError("Event not found");
+        setIsLoading(false);
+        return;
+      }
+
       setEvent(data.events_by_pk);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch event");
@@ -172,6 +233,48 @@ export default function EventDetailsPage() {
     }
   };
 
+  const handleCreateInvitation = async () => {
+    if (!event) return;
+
+    try {
+      const token = generateInvitationToken();
+
+      const { data } = await graphqlRequest<{
+        insert_invitations_one: Invitation;
+      }>(CREATE_INVITATION, {
+        event_id: event.id,
+        token,
+      });
+
+      setNewInvitation(data.insert_invitations_one);
+      fetchEvent(); // Refresh the event data to get the new invitation
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to create invitation"
+      );
+    }
+  };
+
+  const handleDeleteInvitation = async (invitationId: string) => {
+    if (!confirm("Are you sure you want to delete this invitation?")) {
+      return;
+    }
+
+    try {
+      await graphqlRequest(DELETE_INVITATION, { id: invitationId });
+      setEvent({
+        ...event!,
+        invitations: event!.invitations.filter(
+          (inv) => inv.id !== invitationId
+        ),
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete invitation"
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -185,7 +288,8 @@ export default function EventDetailsPage() {
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900">Event not found</h2>
         <p className="mt-2 text-gray-600">
-          The event you're looking for doesn't exist or has been deleted.
+          The event you&apos;re looking for doesn&apos;t exist or has been
+          deleted.
         </p>
       </div>
     );
@@ -502,6 +606,67 @@ export default function EventDetailsPage() {
         </div>
       )}
 
+      {/* Add this section after the event details */}
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Invitations</h2>
+          <button
+            onClick={handleCreateInvitation}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+          >
+            Create Invitation
+          </button>
+        </div>
+
+        {newInvitation && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+            <h3 className="font-semibold text-green-800 mb-2">
+              New Invitation Created!
+            </h3>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                readOnly
+                value={getInvitationUrl(newInvitation.token)}
+                className="flex-1 p-2 border rounded"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    getInvitationUrl(newInvitation.token)
+                  );
+                  alert("Link copied to clipboard!");
+                }}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Copy Link
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {event?.invitations.map((invitation) => (
+            <div
+              key={invitation.id}
+              className="flex items-center justify-between p-4 border rounded-lg"
+            >
+              <div>
+                <p className="font-semibold">
+                  Created: {new Date(invitation.created_at).toLocaleString()}
+                </p>
+              </div>
+              <button
+                onClick={() => handleDeleteInvitation(invitation.id)}
+                className="text-red-500 hover:text-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Attendees Section */}
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6">
@@ -511,7 +676,7 @@ export default function EventDetailsPage() {
         </div>
         <div className="border-t border-gray-200">
           <ul className="divide-y divide-gray-200">
-            {event.attendees?.map((attendee: Attendee) => (
+            {event.attendees?.map((attendee) => (
               <li key={attendee.id} className="px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -541,7 +706,7 @@ export default function EventDetailsPage() {
                 <div className="mt-2 sm:flex sm:justify-between">
                   <div className="sm:flex">
                     <p className="flex items-center text-sm text-gray-500">
-                      RSVP'd on{" "}
+                      RSVP&apos;d on{" "}
                       {new Date(attendee.created_at).toLocaleDateString()}
                     </p>
                   </div>
