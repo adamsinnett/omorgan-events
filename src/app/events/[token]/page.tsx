@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { graphqlRequest } from "@/lib/graphql";
-import { isValidInvitation } from "@/lib/invitations";
 
 interface Event {
   id: string;
@@ -36,7 +35,6 @@ interface Reaction {
 interface InvitationResponse {
   invitations: Array<{
     id: string;
-    expires_at: string;
     event: Event;
   }>;
 }
@@ -52,7 +50,6 @@ const GET_EVENT = `
             is_active: { _eq: true }
         }) {
             id
-            expires_at
             event {
                 id
                 title
@@ -122,12 +119,6 @@ export default function EventPage() {
 
       if (!invitation) {
         setError("Event not found");
-        setLoading(false);
-        return;
-      }
-
-      if (!isValidInvitation(new Date(invitation.expires_at))) {
-        setError("This invitation has expired");
         setLoading(false);
         return;
       }
