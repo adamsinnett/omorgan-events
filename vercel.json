@@ -4,10 +4,5 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["sfo1"],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "NEXT_PUBLIC_HASURA_URL": "@next_public_hasura_url",
-    "HASURA_ADMIN_SECRET": "@hasura_admin_secret"
-  }
+  "regions": ["sfo1"]
 }
