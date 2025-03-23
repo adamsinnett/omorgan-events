@@ -7,6 +7,8 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "your-secret-key"
 );
 
+console.log(JWT_SECRET);
+
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
