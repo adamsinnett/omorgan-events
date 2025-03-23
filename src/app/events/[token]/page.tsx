@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { use } from "react";
 import { graphqlRequest } from "@/lib/graphql";
 import { GET_EVENT_BY_TOKEN } from "@/lib/queries";
 import {
@@ -34,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuthStore } from "@/store/auth";
 
 interface EventPageProps {
   params: Promise<{
@@ -42,7 +44,8 @@ interface EventPageProps {
 }
 
 export default function EventPage({ params }: EventPageProps) {
-  const { token } = use(params);
+  const { token: invitationToken } = use(params);
+  const { loginInvitee, isLoading: isAuthLoading, token } = useAuthStore();
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentAttendee, setCurrentAttendee] = useState<Attendee | null>(null);
@@ -55,16 +58,12 @@ export default function EventPage({ params }: EventPageProps) {
     guest_count: 1,
   });
 
-  useEffect(() => {
-    fetchEvent();
-  }, [token]);
-
-  const fetchEvent = async () => {
+  const fetchEvent = useCallback(async () => {
     try {
       const response = await graphqlRequest<{
         invitations: Array<{ event: Event }>;
       }>(GET_EVENT_BY_TOKEN, {
-        token: token,
+        token: invitationToken,
       });
 
       if (!response.invitations?.[0]?.event) {
@@ -77,7 +76,7 @@ export default function EventPage({ params }: EventPageProps) {
 
       // Check if there's an existing attendee with this invitation token
       const existingAttendee = eventData.attendees?.find(
-        (attendee) => attendee.invitation_token === token
+        (attendee) => attendee.invitation_token === invitationToken
       );
       if (existingAttendee) {
         setCurrentAttendee(existingAttendee);
@@ -87,7 +86,18 @@ export default function EventPage({ params }: EventPageProps) {
     } catch {
       setIsLoading(false);
     }
-  };
+  }, [invitationToken]);
+
+  useEffect(() => {
+    const initialize = async () => {
+      if (!token) {
+        await loginInvitee(invitationToken);
+      }
+      debugger;
+      await fetchEvent();
+    };
+    initialize();
+  }, [loginInvitee, fetchEvent, invitationToken, token]);
 
   const handleRSVP = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +109,7 @@ export default function EventPage({ params }: EventPageProps) {
       }>(CREATE_ATTENDEE, {
         event_id: event.id,
         ...rsvpForm,
-        invitation_token: token,
+        invitation_token: invitationToken,
       });
 
       setCurrentAttendee(response.insert_attendees_one);
@@ -186,7 +196,7 @@ export default function EventPage({ params }: EventPageProps) {
     );
   };
 
-  if (isLoading) {
+  if (isLoading || isAuthLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>

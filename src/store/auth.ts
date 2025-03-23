@@ -18,6 +18,8 @@ interface AuthState {
   isAuthenticated: boolean;
   login: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => void;
+  setToken: (token: string | null) => void;
+  loginInvitee: (invitationToken: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -28,6 +30,35 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
       isAuthenticated: false,
+      setToken: (token) => set({ token }),
+      loginInvitee: async (invitationToken: string) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await fetch("/api/anonymous-auth", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: invitationToken }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch anonymous token");
+          }
+
+          const { token } = await response.json();
+          set({ token, isLoading: false });
+        } catch (error) {
+          set({
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch anonymous token",
+            isLoading: false,
+          });
+        }
+      },
 
       login: async ({ email, password }) => {
         set({ isLoading: true, error: null });
