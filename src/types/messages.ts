@@ -10,7 +10,9 @@ interface Message {
 interface Reaction {
   id: string;
   user_email: string;
+  message_id: string;
   reaction_type: string;
+  created_at: string;
 }
 
 export type { Message, Reaction };
