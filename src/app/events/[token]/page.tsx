@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { graphqlRequest } from "@/lib/graphql";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Event {
   id: string;
@@ -202,19 +204,13 @@ export default function EventPage() {
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-4">Event Wall</h2>
         <form onSubmit={handleCreateMessage} className="mb-6">
-          <textarea
+          <Textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Write a message..."
-            className="w-full p-2 border rounded-lg mb-2"
             rows={3}
           />
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          >
-            Post
-          </button>
+          <Button type="submit">Post</Button>
         </form>
 
         <div className="space-y-4">

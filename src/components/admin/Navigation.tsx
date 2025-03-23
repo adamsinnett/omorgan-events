@@ -3,6 +3,7 @@
 import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
 
 export function Navigation() {
   const router = useRouter();
@@ -25,12 +26,7 @@ export function Navigation() {
             </div>
           </div>
           <div className="flex items-center">
-            <button
-              onClick={handleLogout}
-              className="ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Logout
-            </button>
+            <Button onClick={handleLogout}>Logout</Button>
           </div>
         </div>
       </div>

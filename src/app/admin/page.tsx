@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { graphqlRequest } from "@/lib/graphql";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Event {
   id: string;
@@ -175,14 +177,13 @@ export default function AdminDashboard() {
             >
               Title
             </label>
-            <input
+            <Input
               type="text"
               id="title"
               value={newEvent.title}
               onChange={(e) =>
                 setNewEvent({ ...newEvent, title: e.target.value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
@@ -194,14 +195,13 @@ export default function AdminDashboard() {
             >
               Description
             </label>
-            <textarea
+            <Textarea
               id="description"
               value={newEvent.description}
               onChange={(e) =>
                 setNewEvent({ ...newEvent, description: e.target.value })
               }
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
@@ -214,14 +214,13 @@ export default function AdminDashboard() {
               >
                 Start Time
               </label>
-              <input
+              <Input
                 type="datetime-local"
                 id="start_time"
                 value={newEvent.start_time}
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, start_time: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
               />
             </div>
@@ -232,14 +231,13 @@ export default function AdminDashboard() {
               >
                 End Time
               </label>
-              <input
+              <Input
                 type="datetime-local"
                 id="end_time"
                 value={newEvent.end_time}
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, end_time: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
               />
             </div>
@@ -252,14 +250,13 @@ export default function AdminDashboard() {
             >
               Location
             </label>
-            <input
+            <Input
               type="text"
               id="location"
               value={newEvent.location}
               onChange={(e) =>
                 setNewEvent({ ...newEvent, location: e.target.value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
@@ -271,7 +268,7 @@ export default function AdminDashboard() {
             >
               Maximum Attendees
             </label>
-            <input
+            <Input
               type="number"
               id="max_attendees"
               value={newEvent.max_attendees}
@@ -281,7 +278,6 @@ export default function AdminDashboard() {
                   max_attendees: parseInt(e.target.value),
                 })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
               min="1"
             />
@@ -310,14 +306,13 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center">
-            <input
+            <Input
               type="checkbox"
               id="is_private"
               checked={newEvent.is_private}
               onChange={(e) =>
                 setNewEvent({ ...newEvent, is_private: e.target.checked })
               }
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
             />
             <label
               htmlFor="is_private"

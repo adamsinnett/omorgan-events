@@ -11,7 +11,7 @@
   - [x] Link Hasura to Neon
 - [x] Set up development environment
 - [x] Configure environment variables
-- [ ] Set up CI/CD pipeline
+- [x] Set up CI/CD pipeline
 
 ## Database Setup
 

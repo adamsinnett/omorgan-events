@@ -3,6 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { graphqlRequest } from "@/lib/graphql";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Select, SelectItem } from "@/components/ui/select";
 
 interface Event {
   id: string;
@@ -147,12 +152,9 @@ export default function EventsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Events</h2>
-        <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
+        <Button onClick={() => setShowCreateForm(!showCreateForm)}>
           {showCreateForm ? "Cancel" : "Create Event"}
-        </button>
+        </Button>
       </div>
 
       {error && (
@@ -173,14 +175,13 @@ export default function EventsPage() {
             >
               Title
             </label>
-            <input
+            <Input
               type="text"
               id="title"
               value={newEvent.title}
               onChange={(e) =>
                 setNewEvent({ ...newEvent, title: e.target.value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
@@ -192,14 +193,13 @@ export default function EventsPage() {
             >
               Description
             </label>
-            <textarea
+            <Textarea
               id="description"
               value={newEvent.description}
               onChange={(e) =>
                 setNewEvent({ ...newEvent, description: e.target.value })
               }
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
@@ -212,14 +212,13 @@ export default function EventsPage() {
               >
                 Start Time
               </label>
-              <input
+              <Input
                 type="datetime-local"
                 id="start_time"
                 value={newEvent.start_time}
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, start_time: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
               />
             </div>
@@ -231,14 +230,13 @@ export default function EventsPage() {
               >
                 End Time
               </label>
-              <input
+              <Input
                 type="datetime-local"
                 id="end_time"
                 value={newEvent.end_time}
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, end_time: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
               />
             </div>
@@ -251,14 +249,13 @@ export default function EventsPage() {
             >
               Location
             </label>
-            <input
+            <Input
               type="text"
               id="location"
               value={newEvent.location}
               onChange={(e) =>
                 setNewEvent({ ...newEvent, location: e.target.value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
@@ -270,7 +267,7 @@ export default function EventsPage() {
             >
               Maximum Attendees
             </label>
-            <input
+            <Input
               type="number"
               id="max_attendees"
               value={newEvent.max_attendees}
@@ -280,7 +277,6 @@ export default function EventsPage() {
                   max_attendees: parseInt(e.target.value),
                 })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
               min="1"
             />
@@ -293,30 +289,26 @@ export default function EventsPage() {
             >
               Status
             </label>
-            <select
-              id="status"
+            <Select
               value={newEvent.status}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, status: e.target.value })
+              onValueChange={(value) =>
+                setNewEvent({ ...newEvent, status: value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </Select>
           </div>
 
           <div className="flex items-center">
-            <input
-              type="checkbox"
+            <Checkbox
               id="is_private"
               checked={newEvent.is_private}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, is_private: e.target.checked })
+              onCheckedChange={(checked) =>
+                setNewEvent({ ...newEvent, is_private: checked === true })
               }
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
             />
             <label
               htmlFor="is_private"
@@ -327,12 +319,7 @@ export default function EventsPage() {
           </div>
 
           <div className="flex justify-end">
-            <button
-              type="submit"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Create Event
-            </button>
+            <Button type="submit">Create Event</Button>
           </div>
         </form>
       )}

@@ -12,6 +12,8 @@ import {
   CREATE_INVITATION,
   DELETE_INVITATION,
 } from "@/lib/mutations";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function EventDetailsPage() {
   const params = useParams();
@@ -151,26 +153,11 @@ export default function EventDetailsPage() {
         <div className="flex space-x-3">
           {!isEditing ? (
             <>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Edit Event
-              </button>
-              <button
-                onClick={handleDeleteEvent}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Delete Event
-              </button>
+              <Button onClick={() => setIsEditing(true)}>Edit Event</Button>
+              <Button onClick={handleDeleteEvent}>Delete Event</Button>
             </>
           ) : (
-            <button
-              onClick={() => setIsEditing(false)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Cancel
-            </button>
+            <Button onClick={() => setIsEditing(false)}>Cancel</Button>
           )}
         </div>
       </div>
@@ -193,14 +180,13 @@ export default function EventDetailsPage() {
             >
               Title
             </label>
-            <input
+            <Input
               type="text"
               id="title"
               value={currentEvent.title}
               onChange={(e) =>
                 setEditedEvent({ ...editedEvent, title: e.target.value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
@@ -357,12 +343,7 @@ export default function EventDetailsPage() {
           </div>
 
           <div className="flex justify-end">
-            <button
-              type="submit"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Save Changes
-            </button>
+            <Button type="submit">Save Changes</Button>
           </div>
         </form>
       ) : (
@@ -457,12 +438,7 @@ export default function EventDetailsPage() {
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Invitations</h2>
-          <button
-            onClick={handleCreateInvitation}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          >
-            Create Invitation
-          </button>
+          <Button onClick={handleCreateInvitation}>Create Invitation</Button>
         </div>
 
         {newInvitation && (
@@ -471,23 +447,21 @@ export default function EventDetailsPage() {
               New Invitation Created!
             </h3>
             <div className="flex items-center gap-2">
-              <input
+              <Input
                 type="text"
                 readOnly
                 value={getInvitationUrl(newInvitation.token)}
-                className="flex-1 p-2 border rounded"
               />
-              <button
+              <Button
                 onClick={() => {
                   navigator.clipboard.writeText(
                     getInvitationUrl(newInvitation.token)
                   );
                   alert("Link copied to clipboard!");
                 }}
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
               >
                 Copy Link
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -503,12 +477,9 @@ export default function EventDetailsPage() {
                   Created: {new Date(invitation.created_at).toLocaleString()}
                 </p>
               </div>
-              <button
-                onClick={() => handleDeleteInvitation(invitation.id)}
-                className="text-red-500 hover:text-red-700"
-              >
+              <Button onClick={() => handleDeleteInvitation(invitation.id)}>
                 Delete
-              </button>
+              </Button>
             </div>
           ))}
         </div>
