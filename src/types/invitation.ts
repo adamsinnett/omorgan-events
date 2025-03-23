@@ -1,8 +1,8 @@
-interface Invitation {
+import { Attendee } from "./attendee";
+
+export interface Invitation {
   id: string;
   token: string;
   created_at: string;
-  is_active: boolean;
+  attendee: Attendee | null;
 }
-
-export type { Invitation };

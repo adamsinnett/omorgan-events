@@ -38,11 +38,20 @@ export const GET_EVENT = `
       end_time
       location
       max_attendees
-      created_at
-      updated_at
-      created_by
       status
       is_private
+      created_by
+      created_at
+      updated_at
+      invitations {
+        id
+        token
+        created_at
+        attendee {
+          id
+          email
+        }
+      }
       attendees {
         id
         name
@@ -51,11 +60,17 @@ export const GET_EVENT = `
         guest_count
         created_at
       }
-      invitations {
+      messages {
         id
-        token
+        content
+        created_by
         created_at
-        is_active
+        reactions {
+          id
+          reaction_type
+          user_email
+          created_at
+        }
       }
     }
   }
