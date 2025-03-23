@@ -407,77 +407,74 @@ export default function EventPage({ params }: EventPageProps) {
           </TabsList>
 
           <TabsContent value="discussion">
-            {currentAttendee && (
-              <Card>
-                <CardContent className="pt-6">
-                  <form onSubmit={handleSendMessage} className="space-y-4 mb-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="message">Your Message</Label>
-                      <Textarea
-                        id="message"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Write a message..."
-                        required
-                      />
-                    </div>
-                    <Button type="submit">Send Message</Button>
-                  </form>
+            <Card>
+              <CardContent className="pt-6">
+                <form onSubmit={handleSendMessage} className="space-y-4 mb-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Your Message</Label>
+                    <Textarea
+                      id="message"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Write a message..."
+                      required
+                    />
+                  </div>
+                  <Button type="submit">Send Message</Button>
+                </form>
 
-                  <Separator className="my-6" />
+                <Separator className="my-6" />
 
-                  <ScrollArea className="h-[400px] pr-4">
-                    <div className="space-y-6">
-                      {event.messages?.map((message) => (
-                        <div key={message.id} className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Avatar>
-                              <AvatarImage
-                                src={`https://avatar.vercel.sh/${message.created_by}`}
-                              />
-                              <AvatarFallback>
-                                {message.created_by[0].toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">
-                                {message.created_by}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                {new Date(message.created_at).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="text-gray-700">{message.content}</p>
-                          <div className="flex gap-2">
-                            {["👍", "❤️", "🎉", "👏"].map((emoji) => {
-                              const count = getReactionCount(message, emoji);
-                              const isReacted = hasUserReacted(message, emoji);
-                              return (
-                                <Button
-                                  key={emoji}
-                                  variant={isReacted ? "default" : "outline"}
-                                  size="sm"
-                                  onClick={() =>
-                                    handleReaction(message.id, emoji)
-                                  }
-                                  className="flex items-center gap-1"
-                                >
-                                  <span>{emoji}</span>
-                                  {count > 0 && (
-                                    <span className="text-sm">{count}</span>
-                                  )}
-                                </Button>
-                              );
-                            })}
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="space-y-6">
+                    {event.messages?.map((message) => (
+                      <div key={message.id} className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Avatar>
+                            <AvatarImage
+                              src={`https://avatar.vercel.sh/${message.created_by}`}
+                            />
+                            <AvatarFallback>
+                              {message.created_by[0].toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{message.created_by}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(message.created_at).toLocaleString()}
+                            </p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            )}
+                        <p className="text-gray-700">{message.content}</p>
+                        <div className="flex gap-2">
+                          {["👍", "❤️", "🎉", "👏"].map((emoji) => {
+                            const count = getReactionCount(message, emoji);
+                            const isReacted = hasUserReacted(message, emoji);
+                            return (
+                              <Button
+                                key={emoji}
+                                variant={isReacted ? "default" : "outline"}
+                                size="sm"
+                                onClick={() =>
+                                  handleReaction(message.id, emoji)
+                                }
+                                className="flex items-center gap-1"
+                                disabled={!currentAttendee}
+                              >
+                                <span>{emoji}</span>
+                                {count > 0 && (
+                                  <span className="text-sm">{count}</span>
+                                )}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="attendees">
