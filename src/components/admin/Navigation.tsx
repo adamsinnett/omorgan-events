@@ -3,7 +3,7 @@
 import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
 export function Navigation() {
   const router = useRouter();

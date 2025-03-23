@@ -7,80 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Select, SelectItem } from "@/components/ui/select";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  start_time: string;
-  end_time: string;
-  location: string;
-  max_attendees: number;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-  status: string;
-  is_private: boolean;
-}
-
-const GET_EVENTS = `
-  query GetEvents {
-    events(order_by: { created_at: desc }) {
-      id
-      title
-      description
-      start_time
-      end_time
-      location
-      max_attendees
-      created_at
-      updated_at
-      created_by
-      status
-      is_private
-    }
-  }
-`;
-
-const CREATE_EVENT = `
-  mutation CreateEvent(
-    $title: String!
-    $description: String!
-    $start_time: timestamptz!
-    $end_time: timestamptz!
-    $location: String!
-    $max_attendees: Int!
-    $status: String!
-    $is_private: Boolean!
-  ) {
-    insert_events_one(
-      object: {
-        title: $title
-        description: $description
-        start_time: $start_time
-        end_time: $end_time
-        location: $location
-        max_attendees: $max_attendees
-        status: $status
-        is_private: $is_private
-      }
-    ) {
-      id
-      title
-      description
-      start_time
-      end_time
-      location
-      max_attendees
-      created_at
-      updated_at
-      created_by
-      status
-      is_private
-    }
-  }
-`;
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Event } from "@/types/event";
+import { GET_EVENTS } from "@/lib/queries";
+import { CREATE_EVENT } from "@/lib/mutations";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -168,13 +105,8 @@ export default function EventsPage() {
           onSubmit={handleCreateEvent}
           className="bg-white shadow rounded-lg p-6 space-y-4"
         >
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Title
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
             <Input
               type="text"
               id="title"
@@ -186,13 +118,8 @@ export default function EventsPage() {
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Description
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={newEvent.description}
@@ -205,13 +132,8 @@ export default function EventsPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="start_time"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Start Time
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="start_time">Start Time</Label>
               <Input
                 type="datetime-local"
                 id="start_time"
@@ -223,13 +145,8 @@ export default function EventsPage() {
               />
             </div>
 
-            <div>
-              <label
-                htmlFor="end_time"
-                className="block text-sm font-medium text-gray-700"
-              >
-                End Time
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="end_time">End Time</Label>
               <Input
                 type="datetime-local"
                 id="end_time"
@@ -242,13 +159,8 @@ export default function EventsPage() {
             </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="location"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Location
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
             <Input
               type="text"
               id="location"
@@ -260,13 +172,8 @@ export default function EventsPage() {
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="max_attendees"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Maximum Attendees
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="max_attendees">Maximum Attendees</Label>
             <Input
               type="number"
               id="max_attendees"
@@ -282,13 +189,8 @@ export default function EventsPage() {
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Status
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
             <Select
               value={newEvent.status}
               onValueChange={(value) =>
@@ -296,13 +198,18 @@ export default function EventsPage() {
               }
               required
             >
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <Checkbox
               id="is_private"
               checked={newEvent.is_private}
@@ -310,12 +217,7 @@ export default function EventsPage() {
                 setNewEvent({ ...newEvent, is_private: checked === true })
               }
             />
-            <label
-              htmlFor="is_private"
-              className="ml-2 block text-sm text-gray-900"
-            >
-              Private Event
-            </label>
+            <Label htmlFor="is_private">Private Event</Label>
           </div>
 
           <div className="flex justify-end">

@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, PropsWithChildren } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Navigation } from "@/components/admin/Navigation";
 import { useAuthStore } from "@/store/auth";
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+
+export default function AdminLayout({ children }: PropsWithChildren) {
   const router = useRouter();
   const pathname = usePathname();
   const { token, isLoading } = useAuthStore();

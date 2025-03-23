@@ -5,21 +5,17 @@ import Link from "next/link";
 import { graphqlRequest } from "@/lib/graphql";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  start_time: string;
-  end_time: string;
-  location: string;
-  max_attendees: number;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-  status: string;
-  is_private: boolean;
-}
+import type { Event } from "@/types/event";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const GET_EVENTS = `
   query GetEvents {
@@ -151,12 +147,9 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Events</h2>
-        <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
+        <Button onClick={() => setShowCreateForm(!showCreateForm)}>
           {showCreateForm ? "Cancel" : "Create Event"}
-        </button>
+        </Button>
       </div>
 
       {error && (
@@ -170,13 +163,8 @@ export default function AdminDashboard() {
           onSubmit={handleCreateEvent}
           className="bg-white shadow rounded-lg p-6 space-y-4"
         >
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Title
-            </label>
+          <div className="flex flex-col items-start space-y-2">
+            <Label htmlFor="title">Title</Label>
             <Input
               type="text"
               id="title"
@@ -188,13 +176,8 @@ export default function AdminDashboard() {
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Description
-            </label>
+          <div className="flex flex-col items-start space-y-2">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={newEvent.description}
@@ -207,13 +190,8 @@ export default function AdminDashboard() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="start_time"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Start Time
-              </label>
+            <div className="flex flex-col items-start space-y-2">
+              <Label htmlFor="start_time">Start Time</Label>
               <Input
                 type="datetime-local"
                 id="start_time"
@@ -224,13 +202,8 @@ export default function AdminDashboard() {
                 required
               />
             </div>
-            <div>
-              <label
-                htmlFor="end_time"
-                className="block text-sm font-medium text-gray-700"
-              >
-                End Time
-              </label>
+            <div className="flex flex-col items-start space-y-2">
+              <Label htmlFor="end_time">End Time</Label>
               <Input
                 type="datetime-local"
                 id="end_time"
@@ -243,13 +216,8 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="location"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Location
-            </label>
+          <div className="flex flex-col items-start space-y-2">
+            <Label htmlFor="location">Location</Label>
             <Input
               type="text"
               id="location"
@@ -261,13 +229,8 @@ export default function AdminDashboard() {
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="max_attendees"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Maximum Attendees
-            </label>
+          <div className="flex flex-col items-start space-y-2">
+            <Label htmlFor="max_attendees">Maximum Attendees</Label>
             <Input
               type="number"
               id="max_attendees"
@@ -283,52 +246,44 @@ export default function AdminDashboard() {
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Status
-            </label>
-            <select
-              id="status"
+          <div className="flex flex-col items-start space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select
               value={newEvent.status}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, status: e.target.value })
+              onValueChange={(value) =>
+                setNewEvent({ ...newEvent, status: value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="flex items-center">
-            <Input
-              type="checkbox"
+          <div className="flex items-center space-x-2">
+            <Checkbox
               id="is_private"
               checked={newEvent.is_private}
-              onChange={(e) =>
-                setNewEvent({ ...newEvent, is_private: e.target.checked })
+              onCheckedChange={(checked) =>
+                setNewEvent({ ...newEvent, is_private: checked === true })
               }
             />
-            <label
+            <Label
               htmlFor="is_private"
-              className="ml-2 block text-sm text-gray-900"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Private Event
-            </label>
+            </Label>
           </div>
 
           <div className="flex justify-end">
-            <button
-              type="submit"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Create Event
-            </button>
+            <Button type="submit">Create Event</Button>
           </div>
         </form>
       )}

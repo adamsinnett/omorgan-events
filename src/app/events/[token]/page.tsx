@@ -4,34 +4,10 @@ import { useState, useEffect, use } from "react";
 import { graphqlRequest } from "@/lib/graphql";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  start_time: string;
-  end_time: string;
-  location: string;
-  max_attendees: number;
-  status: string;
-  is_private: boolean;
-  messages: Message[];
-}
-
-interface Message {
-  id: string;
-  content: string;
-  created_by: string;
-  created_at: string;
-  is_pinned: boolean;
-  reactions: Reaction[];
-}
-
-interface Reaction {
-  id: string;
-  user_email: string;
-  reaction_type: string;
-}
+import { GET_EVENT_BY_TOKEN } from "@/lib/queries";
+import { CREATE_MESSAGE } from "@/lib/mutations";
+import type { Event } from "@/types/event";
+import type { Message } from "@/types/messages";
 
 interface InvitationResponse {
   invitations: Array<{
@@ -43,61 +19,6 @@ interface InvitationResponse {
 interface MessageResponse {
   insert_messages_one: Message;
 }
-
-const GET_EVENT = `
-    query GetEvent($token: String!) {
-        invitations(where: { 
-            token: { _eq: $token },
-            is_active: { _eq: true }
-        }) {
-            id
-            event {
-                id
-                title
-                description
-                start_time
-                end_time
-                location
-                max_attendees
-                status
-                is_private
-                messages(order_by: { created_at: desc }) {
-                    id
-                    content
-                    created_by
-                    created_at
-                    is_pinned
-                    reactions {
-                        id
-                        user_email
-                        reaction_type
-                    }
-                }
-            }
-        }
-    }
-`;
-
-const CREATE_MESSAGE = `
-    mutation CreateMessage($eventId: uuid!, $content: String!) {
-        insert_messages_one(object: {
-            event_id: $eventId,
-            content: $content,
-            created_by: "anonymous"
-        }) {
-            id
-            content
-            created_by
-            created_at
-            is_pinned
-            reactions {
-                id
-                user_email
-                reaction_type
-            }
-        }
-    }
-`;
 
 interface EventPageProps {
   params: Promise<{ token: string }>;
@@ -117,9 +38,12 @@ export default function EventPage({ params }: EventPageProps) {
 
   const fetchEvent = async () => {
     try {
-      const response = await graphqlRequest<InvitationResponse>(GET_EVENT, {
-        token,
-      });
+      const response = await graphqlRequest<InvitationResponse>(
+        GET_EVENT_BY_TOKEN,
+        {
+          token,
+        }
+      );
       const invitation = response.invitations[0];
 
       if (!invitation) {
@@ -150,7 +74,7 @@ export default function EventPage({ params }: EventPageProps) {
       const newMessageData = response.insert_messages_one;
       setEvent((prev) => ({
         ...prev!,
-        messages: [newMessageData, ...prev!.messages],
+        messages: [newMessageData, ...(prev!.messages || [])],
       }));
       setNewMessage("");
     } catch (err) {
@@ -216,7 +140,7 @@ export default function EventPage({ params }: EventPageProps) {
         </form>
 
         <div className="space-y-4">
-          {event.messages.map((message) => (
+          {event.messages?.map((message) => (
             <div key={message.id} className="border-b pb-4">
               <div className="flex justify-between items-start mb-2">
                 <div>

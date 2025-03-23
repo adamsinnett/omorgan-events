@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, use } from "react";
 import { graphqlRequest } from "@/lib/graphql";
 import { generateInvitationToken, getInvitationUrl } from "@/lib/invitations";
 import { GET_EVENT } from "@/lib/queries";
-import { Event, Invitation, EventResponse } from "./types";
+import { Event, EventResponse } from "@/types/event";
+import { Invitation } from "@/types/invitation";
 import {
   UPDATE_EVENT,
   DELETE_EVENT,
@@ -13,6 +14,16 @@ import {
 } from "@/lib/mutations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface EventDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -116,7 +127,7 @@ export default function EventDetailsPage({ params }: EventDetailsPageProps) {
       await graphqlRequest(DELETE_INVITATION, { id: invitationId });
       setEvent({
         ...event!,
-        invitations: event!.invitations.filter(
+        invitations: event?.invitations?.filter(
           (inv) => inv.id !== invitationId
         ),
       });
@@ -176,13 +187,8 @@ export default function EventDetailsPage({ params }: EventDetailsPageProps) {
           onSubmit={handleUpdateEvent}
           className="bg-white shadow rounded-lg p-6 space-y-4"
         >
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Title
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
             <Input
               type="text"
               id="title"
@@ -194,34 +200,23 @@ export default function EventDetailsPage({ params }: EventDetailsPageProps) {
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Description
-            </label>
-            <textarea
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
               id="description"
               value={currentEvent.description}
               onChange={(e) =>
                 setEditedEvent({ ...editedEvent, description: e.target.value })
               }
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="start_time"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Start Time
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="start_time">Start Time</Label>
+              <Input
                 type="datetime-local"
                 id="start_time"
                 value={new Date(currentEvent.start_time)
@@ -233,19 +228,13 @@ export default function EventDetailsPage({ params }: EventDetailsPageProps) {
                     start_time: new Date(e.target.value).toISOString(),
                   })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
               />
             </div>
 
-            <div>
-              <label
-                htmlFor="end_time"
-                className="block text-sm font-medium text-gray-700"
-              >
-                End Time
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="end_time">End Time</Label>
+              <Input
                 type="datetime-local"
                 id="end_time"
                 value={new Date(currentEvent.end_time)
@@ -257,39 +246,27 @@ export default function EventDetailsPage({ params }: EventDetailsPageProps) {
                     end_time: new Date(e.target.value).toISOString(),
                   })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
               />
             </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="location"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Location
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
               type="text"
               id="location"
               value={currentEvent.location}
               onChange={(e) =>
                 setEditedEvent({ ...editedEvent, location: e.target.value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="max_attendees"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Maximum Attendees
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="max_attendees">Maximum Attendees</Label>
+            <Input
               type="number"
               id="max_attendees"
               value={currentEvent.max_attendees}
@@ -299,50 +276,40 @@ export default function EventDetailsPage({ params }: EventDetailsPageProps) {
                   max_attendees: parseInt(e.target.value),
                 })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
               min="1"
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Status
-            </label>
-            <select
-              id="status"
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select
               value={currentEvent.status}
-              onChange={(e) =>
-                setEditedEvent({ ...editedEvent, status: e.target.value })
+              onValueChange={(value) =>
+                setEditedEvent({ ...editedEvent, status: value })
               }
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               required
             >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="flex items-center">
-            <input
-              type="checkbox"
+          <div className="flex items-center space-x-2">
+            <Checkbox
               id="is_private"
               checked={currentEvent.is_private}
-              onChange={(e) =>
-                setEditedEvent({ ...editedEvent, is_private: e.target.checked })
+              onCheckedChange={(checked) =>
+                setEditedEvent({ ...editedEvent, is_private: checked === true })
               }
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
             />
-            <label
-              htmlFor="is_private"
-              className="ml-2 block text-sm text-gray-900"
-            >
-              Private Event
-            </label>
+            <Label htmlFor="is_private">Private Event</Label>
           </div>
 
           <div className="flex justify-end">
@@ -470,7 +437,7 @@ export default function EventDetailsPage({ params }: EventDetailsPageProps) {
         )}
 
         <div className="space-y-4">
-          {event?.invitations.map((invitation) => (
+          {event?.invitations?.map((invitation) => (
             <div
               key={invitation.id}
               className="flex items-center justify-between p-4 border rounded-lg"

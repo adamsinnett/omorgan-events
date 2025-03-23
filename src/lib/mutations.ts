@@ -1,4 +1,42 @@
 // EVENTS
+export const CREATE_EVENT = `
+  mutation CreateEvent(
+    $title: String!
+    $description: String!
+    $start_time: timestamptz!
+    $end_time: timestamptz!
+    $location: String!
+    $max_attendees: Int!
+    $status: String!
+    $is_private: Boolean!
+  ) {
+    insert_events_one(
+      object: {
+        title: $title
+        description: $description
+        start_time: $start_time
+        end_time: $end_time
+        location: $location
+        max_attendees: $max_attendees
+        status: $status
+        is_private: $is_private
+      }
+    ) {
+      id
+      title
+      description
+      start_time
+      end_time
+      location
+      max_attendees
+      created_at
+      updated_at
+      created_by
+      status
+      is_private
+    }
+  }
+`;
 
 const UPDATE_EVENT = `
   mutation UpdateEvent(
@@ -63,6 +101,8 @@ const DELETE_EVENT = `
   }
 `;
 
+// INVITATIONS
+
 const CREATE_INVITATION = `
   mutation CreateInvitation($event_id: uuid!, $token: String!) {
     insert_invitations_one(
@@ -89,4 +129,33 @@ const DELETE_INVITATION = `
   }
 `;
 
-export { UPDATE_EVENT, DELETE_EVENT, CREATE_INVITATION, DELETE_INVITATION };
+// MESSAGES
+
+const CREATE_MESSAGE = `
+    mutation CreateMessage($eventId: uuid!, $content: String!) {
+        insert_messages_one(object: {
+            event_id: $eventId,
+            content: $content,
+            created_by: "anonymous"
+        }) {
+            id
+            content
+            created_by
+            created_at
+            is_pinned
+            reactions {
+                id
+                user_email
+                reaction_type
+            }
+        }
+    }
+`;
+
+export {
+  UPDATE_EVENT,
+  DELETE_EVENT,
+  CREATE_INVITATION,
+  DELETE_INVITATION,
+  CREATE_MESSAGE,
+};

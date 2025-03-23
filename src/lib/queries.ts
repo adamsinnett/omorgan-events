@@ -60,3 +60,56 @@ export const GET_EVENT = `
     }
   }
 `;
+
+export const GET_EVENTS = `
+  query GetEvents {
+    events(order_by: { created_at: desc }) {
+      id
+      title
+      description
+      start_time
+      end_time
+      location
+      max_attendees
+      created_at
+      updated_at
+      created_by
+      status
+      is_private
+    }
+  }
+`;
+
+export const GET_EVENT_BY_TOKEN = `
+    query GetEvent($token: String!) {
+        invitations(where: { 
+            token: { _eq: $token },
+            is_active: { _eq: true }
+        }) {
+            id
+            event {
+                id
+                title
+                description
+                start_time
+                end_time
+                location
+                max_attendees
+                status
+                is_private
+                messages(order_by: { created_at: desc }) {
+                    id
+                    content
+                    created_by
+                    created_at
+                    is_pinned
+                    reactions {
+                        id
+                        user_email
+                        reaction_type
+                    }
+                }
+            }
+        }
+    }
+`;
