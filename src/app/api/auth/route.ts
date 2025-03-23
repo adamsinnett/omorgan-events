@@ -2,12 +2,9 @@ import { NextResponse } from "next/server";
 import { SignJWT } from "jose";
 import bcrypt from "bcryptjs";
 import { query } from "@/lib/db";
+import { env } from "@/lib/env";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "your-secret-key"
-);
-
-console.log(JWT_SECRET);
+const JWT_SECRET = new TextEncoder().encode(env.JWT_SECRET);
 
 export async function POST(request: Request) {
   try {
