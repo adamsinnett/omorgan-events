@@ -38,7 +38,7 @@ export const CREATE_EVENT = `
   }
 `;
 
-const UPDATE_EVENT = `
+export const UPDATE_EVENT = `
   mutation UpdateEvent(
     $id: uuid!
     $title: String!
@@ -93,7 +93,7 @@ const UPDATE_EVENT = `
   }
 `;
 
-const DELETE_EVENT = `
+export const DELETE_EVENT = `
   mutation DeleteEvent($id: uuid!) {
     delete_events_by_pk(id: $id) {
       id
@@ -102,8 +102,7 @@ const DELETE_EVENT = `
 `;
 
 // INVITATIONS
-
-const CREATE_INVITATION = `
+export const CREATE_INVITATION = `
   mutation CreateInvitation($event_id: uuid!, $token: String!) {
     insert_invitations_one(
       object: {
@@ -121,7 +120,7 @@ const CREATE_INVITATION = `
   }
 `;
 
-const DELETE_INVITATION = `
+export const DELETE_INVITATION = `
   mutation DeleteInvitation($id: uuid!) {
     delete_invitations_by_pk(id: $id) {
       id
@@ -129,33 +128,69 @@ const DELETE_INVITATION = `
   }
 `;
 
-// MESSAGES
-
-const CREATE_MESSAGE = `
-    mutation CreateMessage($eventId: uuid!, $content: String!) {
-        insert_messages_one(object: {
-            event_id: $eventId,
-            content: $content,
-            created_by: "anonymous"
-        }) {
-            id
-            content
-            created_by
-            created_at
-            is_pinned
-            reactions {
-                id
-                user_email
-                reaction_type
-            }
-        }
+// ATTENDEES
+export const CREATE_ATTENDEE = `
+  mutation CreateAttendee($event_id: uuid!, $name: String!, $email: String!, $status: String!, $guest_count: Int!, $invitation_token: String!) {
+    insert_attendees_one(object: {
+      event_id: $event_id,
+      name: $name,
+      email: $email,
+      status: $status,
+      guest_count: $guest_count,
+      invitation_token: $invitation_token
+    }) {
+      id
+      name
+      email
+      status
+      guest_count
+      created_at
+      invitation_token
     }
+  }
 `;
 
-export {
-  UPDATE_EVENT,
-  DELETE_EVENT,
-  CREATE_INVITATION,
-  DELETE_INVITATION,
-  CREATE_MESSAGE,
-};
+// MESSAGES
+export const CREATE_MESSAGE = `
+  mutation CreateMessage($event_id: uuid!, $content: String!, $created_by: String!) {
+    insert_messages_one(object: {
+      event_id: $event_id,
+      content: $content,
+      created_by: $created_by
+    }) {
+      id
+      content
+      created_by
+      created_at
+      is_pinned
+      reactions {
+        id
+        user_email
+        reaction_type
+      }
+    }
+  }
+`;
+
+// REACTIONS
+export const CREATE_REACTION = `
+  mutation CreateReaction($message_id: uuid!, $user_email: String!, $reaction_type: String!) {
+    insert_reactions_one(object: {
+      message_id: $message_id,
+      user_email: $user_email,
+      reaction_type: $reaction_type
+    }) {
+      id
+      user_email
+      reaction_type
+    }
+  }
+`;
+
+export const DELETE_REACTION = `
+  mutation DeleteReaction($id: uuid!) {
+    delete_reactions_by_pk(id: $id) {
+      id
+    }
+  }
+`;

@@ -87,6 +87,7 @@ export const GET_EVENT_BY_TOKEN = `
             is_active: { _eq: true }
         }) {
             id
+            token
             event {
                 id
                 title
@@ -97,6 +98,15 @@ export const GET_EVENT_BY_TOKEN = `
                 max_attendees
                 status
                 is_private
+                attendees {
+                    id
+                    name
+                    email
+                    status
+                    guest_count
+                    created_at
+                    invitation_token
+                }
                 messages(order_by: { created_at: desc }) {
                     id
                     content
