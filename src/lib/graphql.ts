@@ -1,45 +1,28 @@
-import { env, publicEnv } from "./env";
+import { useAuthStore } from "@/store/auth";
+import { GraphQLClient } from "graphql-request";
 
-interface GraphQLResponse<T> {
-  data: T;
-  errors?: Array<{
-    message: string;
-    locations?: Array<{
-      line: number;
-      column: number;
-    }>;
-    path?: string[];
-    extensions?: Record<string, unknown>;
-  }>;
-}
+const HASURA_URL =
+  process.env.NEXT_PUBLIC_HASURA_URL || "http://localhost:8080/v1/graphql";
 
-export async function graphqlRequest<T>(
+export const graphqlRequest = async <T = unknown>(
   query: string,
-  variables?: Record<string, unknown>,
-  headers: Record<string, string> = {}
-): Promise<GraphQLResponse<T>> {
-  const response = await fetch(publicEnv.NEXT_PUBLIC_HASURA_URL!, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-hasura-admin-secret": env.HASURA_ADMIN_SECRET!,
-      ...headers,
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
+  variables?: Record<string, unknown>
+): Promise<T> => {
+  const { token } = useAuthStore.getState();
+
+  const client = new GraphQLClient(HASURA_URL, {
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
+          "x-hasura-role": "admin",
+        }
+      : {},
   });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+  try {
+    return await client.request<T>(query, variables);
+  } catch (error) {
+    console.error("GraphQL request failed:", error);
+    throw error;
   }
-
-  const result = await response.json();
-
-  if (result.errors) {
-    throw new Error(result.errors[0].message);
-  }
-
-  return result;
-}
+};

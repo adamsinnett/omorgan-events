@@ -1,10 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { generateToken, verifyToken } from "@/lib/auth";
 import { graphqlRequest } from "@/lib/graphql";
 import { LOGIN_ADMIN, UPDATE_LAST_LOGIN } from "@/lib/queries";
-import { comparePasswords } from "@/lib/auth";
-import { JWTClaims } from "@/types/auth";
 
 interface User {
   id: string;
@@ -21,12 +18,11 @@ interface AuthState {
   isAuthenticated: boolean;
   login: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => void;
-  checkAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: null,
       isLoading: false,
@@ -37,8 +33,25 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
 
         try {
+          const response = await fetch("/api/auth", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Invalid credentials");
+          }
+
+          const { token } = await response.json();
+
+          // Update state
+          set({ token });
+
           // Query admin user by email
-          const { data } = await graphqlRequest<{
+          const { admin_users } = await graphqlRequest<{
             admin_users: Array<{
               id: string;
               email: string;
@@ -48,36 +61,14 @@ export const useAuthStore = create<AuthState>()(
             }>;
           }>(LOGIN_ADMIN, { email });
 
-          const adminUser = data.admin_users[0];
+          const adminUser = admin_users[0];
 
           if (!adminUser) {
             throw new Error("Invalid email or password");
           }
 
-          // Verify password
-          const isValidPassword = await comparePasswords(
-            password,
-            adminUser.password_hash
-          );
-
-          if (!isValidPassword) {
-            throw new Error("Invalid email or password");
-          }
-
-          if (!adminUser.is_active) {
-            throw new Error("Account is deactivated");
-          }
-
-          // Update last login
+          // Update last login TODO: move to api call
           await graphqlRequest(UPDATE_LAST_LOGIN, { id: adminUser.id });
-
-          // Generate JWT token
-          const claims: Omit<JWTClaims, "iat" | "exp"> = {
-            id: adminUser.id,
-            email: adminUser.email,
-            role: "admin",
-          };
-          const token = await generateToken(claims);
 
           // Update state
           set({
@@ -87,7 +78,6 @@ export const useAuthStore = create<AuthState>()(
               isActive: adminUser.is_active,
               lastLoginAt: adminUser.last_login_at,
             },
-            token,
             isAuthenticated: true,
             isLoading: false,
           });
@@ -106,52 +96,6 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
           error: null,
         });
-      },
-
-      checkAuth: async () => {
-        const { token } = get();
-        if (!token) {
-          set({ isAuthenticated: false, user: null });
-          return;
-        }
-
-        try {
-          const claims = await verifyToken(token);
-          if (!claims) {
-            set({ isAuthenticated: false, user: null });
-            return;
-          }
-
-          // Query user data
-          const { data } = await graphqlRequest<{
-            admin_users: Array<{
-              id: string;
-              email: string;
-              is_active: boolean;
-              last_login_at: string | null;
-            }>;
-          }>(LOGIN_ADMIN, { email: claims.email });
-
-          const adminUser = data.admin_users[0];
-
-          if (!adminUser || !adminUser.is_active) {
-            set({ isAuthenticated: false, user: null, token: null });
-            return;
-          }
-
-          set({
-            user: {
-              id: adminUser.id,
-              email: adminUser.email,
-              isActive: adminUser.is_active,
-              lastLoginAt: adminUser.last_login_at,
-            },
-            isAuthenticated: true,
-            token,
-          });
-        } catch {
-          set({ isAuthenticated: false, user: null, token: null });
-        }
       },
     }),
     {

@@ -12,23 +12,23 @@ export const env = {
   HASURA_ADMIN_SECRET: process.env.HASURA_ADMIN_SECRET,
   ADMIN_USERNAME: process.env.ADMIN_USERNAME,
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+  JWT_SECRET: process.env.JWT_SECRET,
 } as const;
 
 // Client-side variables (must be prefixed with NEXT_PUBLIC_)
 export const publicEnv = {
   NEXT_PUBLIC_HASURA_URL: process.env.NEXT_PUBLIC_HASURA_URL,
-  NEXT_PUBLIC_JWT_SECRET: process.env.NEXT_PUBLIC_JWT_SECRET,
 } as const;
 
 // Validate required environment variables
 const requiredEnvVars = {
   DATABASE_URL: env.DATABASE_URL,
   HASURA_ADMIN_SECRET: env.HASURA_ADMIN_SECRET,
+  JWT_SECRET: env.JWT_SECRET,
 } as const;
 
 const requiredPublicEnvVars = {
   NEXT_PUBLIC_HASURA_URL: publicEnv.NEXT_PUBLIC_HASURA_URL,
-  NEXT_PUBLIC_JWT_SECRET: publicEnv.NEXT_PUBLIC_JWT_SECRET,
 } as const;
 
 // Check for missing environment variables

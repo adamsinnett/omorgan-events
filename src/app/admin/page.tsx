@@ -96,8 +96,8 @@ export default function AdminDashboard() {
 
   const fetchEvents = async () => {
     try {
-      const { data } = await graphqlRequest<{ events: Event[] }>(GET_EVENTS);
-      setEvents(data.events);
+      const response = await graphqlRequest<{ events: Event[] }>(GET_EVENTS);
+      setEvents(response.events);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch events");
     } finally {
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await graphqlRequest<{ insert_events_one: Event }>(
+      const response = await graphqlRequest<{ insert_events_one: Event }>(
         CREATE_EVENT,
         {
           ...newEvent,
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
           end_time: new Date(newEvent.end_time).toISOString(),
         }
       );
-      setEvents([data.insert_events_one, ...events]);
+      setEvents([response.insert_events_one, ...events]);
       setShowCreateForm(false);
       setNewEvent({
         title: "",

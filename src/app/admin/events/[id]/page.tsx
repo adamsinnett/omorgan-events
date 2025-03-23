@@ -1,168 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { graphqlRequest } from "@/lib/graphql";
 import { generateInvitationToken, getInvitationUrl } from "@/lib/invitations";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  start_time: string;
-  end_time: string;
-  location: string;
-  max_attendees: number;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-  status: string;
-  is_private: boolean;
-  attendees: Attendee[];
-  invitations: Invitation[];
-}
-
-interface Attendee {
-  id: string;
-  email: string;
-  name: string;
-  status: string;
-  guest_count: number;
-  created_at: string;
-}
-
-interface Invitation {
-  id: string;
-  token: string;
-  created_at: string;
-  is_active: boolean;
-}
-
-interface EventResponse {
-  events_by_pk: Event;
-}
-
-const GET_EVENT = `
-  query GetEvent($id: uuid!) {
-    events_by_pk(id: $id) {
-      id
-      title
-      description
-      start_time
-      end_time
-      location
-      max_attendees
-      created_at
-      updated_at
-      created_by
-      status
-      is_private
-      attendees {
-        id
-        name
-        email
-        status
-        guest_count
-        created_at
-      }
-      invitations {
-        id
-        token
-        created_at
-        is_active
-      }
-    }
-  }
-`;
-
-const UPDATE_EVENT = `
-  mutation UpdateEvent(
-    $id: uuid!
-    $title: String!
-    $description: String!
-    $start_time: timestamptz!
-    $end_time: timestamptz!
-    $location: String!
-    $max_attendees: Int!
-    $status: String!
-    $is_private: Boolean!
-  ) {
-    update_events_by_pk(
-      pk_columns: { id: $id }
-      _set: {
-        title: $title
-        description: $description
-        start_time: $start_time
-        end_time: $end_time
-        location: $location
-        max_attendees: $max_attendees
-        status: $status
-        is_private: $is_private
-      }
-    ) {
-      id
-      title
-      description
-      start_time
-      end_time
-      location
-      max_attendees
-      created_at
-      updated_at
-      created_by
-      status
-      is_private
-      attendees {
-        id
-        email
-        name
-        status
-        guest_count
-        created_at
-      }
-      invitations {
-        id
-        token
-        created_at
-        is_active
-      }
-    }
-  }
-`;
-
-const DELETE_EVENT = `
-  mutation DeleteEvent($id: uuid!) {
-    delete_events_by_pk(id: $id) {
-      id
-    }
-  }
-`;
-
-const CREATE_INVITATION = `
-  mutation CreateInvitation($event_id: uuid!, $token: String!) {
-    insert_invitations_one(
-      object: {
-        event_id: $event_id
-        token: $token
-        created_by: "admin"
-        is_active: true
-      }
-    ) {
-      id
-      token
-      created_at
-      is_active
-    }
-  }
-`;
-
-const DELETE_INVITATION = `
-  mutation DeleteInvitation($id: uuid!) {
-    delete_invitations_by_pk(id: $id) {
-      id
-    }
-  }
-`;
+import { GET_EVENT } from "@/lib/queries";
+import { Event, Invitation, EventResponse } from "./types";
+import {
+  UPDATE_EVENT,
+  DELETE_EVENT,
+  CREATE_INVITATION,
+  DELETE_INVITATION,
+} from "@/lib/mutations";
 
 export default function EventDetailsPage() {
   const params = useParams();
@@ -173,43 +22,43 @@ export default function EventDetailsPage() {
   const [editedEvent, setEditedEvent] = useState<Partial<Event>>({});
   const [newInvitation, setNewInvitation] = useState<Invitation | null>(null);
 
-  const fetchEvent = async () => {
+  const fetchEvent = useCallback(async () => {
     try {
-      const { data } = await graphqlRequest<EventResponse>(GET_EVENT, {
+      const response = await graphqlRequest<EventResponse>(GET_EVENT, {
         id: params.id,
       });
 
-      if (!data.events_by_pk) {
+      if (!response.events_by_pk) {
         setError("Event not found");
         setIsLoading(false);
         return;
       }
 
-      setEvent(data.events_by_pk);
+      setEvent(response.events_by_pk);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch event");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [params.id]);
 
   useEffect(() => {
     fetchEvent();
-  }, [params.id]);
+  }, [fetchEvent, params.id]);
 
   const handleUpdateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!event) return;
 
     try {
-      const { data } = await graphqlRequest<{ update_events_by_pk: Event }>(
+      const response = await graphqlRequest<{ update_events_by_pk: Event }>(
         UPDATE_EVENT,
         {
           id: event.id,
           ...editedEvent,
         }
       );
-      setEvent(data.update_events_by_pk);
+      setEvent(response.update_events_by_pk);
       setIsEditing(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update event");
@@ -237,14 +86,14 @@ export default function EventDetailsPage() {
     try {
       const token = generateInvitationToken();
 
-      const { data } = await graphqlRequest<{
+      const response = await graphqlRequest<{
         insert_invitations_one: Invitation;
       }>(CREATE_INVITATION, {
         event_id: event.id,
         token,
       });
 
-      setNewInvitation(data.insert_invitations_one);
+      setNewInvitation(response.insert_invitations_one);
       fetchEvent(); // Refresh the event data to get the new invitation
     } catch (err) {
       setError(

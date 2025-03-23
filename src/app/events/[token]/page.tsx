@@ -108,6 +108,7 @@ export default function EventPage() {
 
   useEffect(() => {
     fetchEvent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const fetchEvent = async () => {
@@ -115,7 +116,7 @@ export default function EventPage() {
       const response = await graphqlRequest<InvitationResponse>(GET_EVENT, {
         token,
       });
-      const invitation = response.data.invitations[0];
+      const invitation = response.invitations[0];
 
       if (!invitation) {
         setError("Event not found");
@@ -142,7 +143,7 @@ export default function EventPage() {
         content: newMessage.trim(),
       });
 
-      const newMessageData = response.data.insert_messages_one;
+      const newMessageData = response.insert_messages_one;
       setEvent((prev) => ({
         ...prev!,
         messages: [newMessageData, ...prev!.messages],

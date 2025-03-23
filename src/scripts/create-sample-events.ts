@@ -102,11 +102,10 @@ const sampleEvents = [
 async function createSampleEvents() {
   try {
     for (const event of sampleEvents) {
-      const { data } = await graphqlRequest<{ insert_events_one: Event }>(
-        CREATE_EVENT,
-        event
-      );
-      console.log("Created event:", data.insert_events_one.title);
+      const { insert_events_one } = await graphqlRequest<{
+        insert_events_one: Event;
+      }>(CREATE_EVENT, event);
+      console.log("Created event:", insert_events_one.title);
     }
     console.log("All sample events created successfully!");
   } catch (error) {
