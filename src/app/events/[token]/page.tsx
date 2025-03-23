@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useState, useEffect, use } from "react";
 import { graphqlRequest } from "@/lib/graphql";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -100,9 +99,12 @@ const CREATE_MESSAGE = `
     }
 `;
 
-export default function EventPage() {
-  const params = useParams();
-  const token = params.token as string;
+interface EventPageProps {
+  params: Promise<{ token: string }>;
+}
+
+export default function EventPage({ params }: EventPageProps) {
+  const { token } = use(params);
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

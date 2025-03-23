@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useState, useEffect, useCallback, use } from "react";
 import { graphqlRequest } from "@/lib/graphql";
 import { generateInvitationToken, getInvitationUrl } from "@/lib/invitations";
 import { GET_EVENT } from "@/lib/queries";
@@ -15,8 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function EventDetailsPage() {
-  const params = useParams();
+interface EventDetailsPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function EventDetailsPage({ params }: EventDetailsPageProps) {
+  const { id } = use(params);
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +30,7 @@ export default function EventDetailsPage() {
   const fetchEvent = useCallback(async () => {
     try {
       const response = await graphqlRequest<EventResponse>(GET_EVENT, {
-        id: params.id,
+        id,
       });
 
       if (!response.events_by_pk) {
@@ -42,11 +45,11 @@ export default function EventDetailsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [params.id]);
+  }, [id]);
 
   useEffect(() => {
     fetchEvent();
-  }, [fetchEvent, params.id]);
+  }, [fetchEvent, id]);
 
   const handleUpdateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
