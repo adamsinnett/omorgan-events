@@ -95,8 +95,8 @@ export default function EventsPage() {
 
   const fetchEvents = async () => {
     try {
-      const { data } = await graphqlRequest<{ events: Event[] }>(GET_EVENTS);
-      setEvents(data.events);
+      const { events } = await graphqlRequest<{ events: Event[] }>(GET_EVENTS);
+      setEvents(events);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch events");
     } finally {
@@ -111,15 +111,14 @@ export default function EventsPage() {
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await graphqlRequest<{ insert_events_one: Event }>(
-        CREATE_EVENT,
-        {
-          ...newEvent,
-          start_time: new Date(newEvent.start_time).toISOString(),
-          end_time: new Date(newEvent.end_time).toISOString(),
-        }
-      );
-      setEvents([data.insert_events_one, ...events]);
+      const { insert_events_one } = await graphqlRequest<{
+        insert_events_one: Event;
+      }>(CREATE_EVENT, {
+        ...newEvent,
+        start_time: new Date(newEvent.start_time).toISOString(),
+        end_time: new Date(newEvent.end_time).toISOString(),
+      });
+      setEvents([insert_events_one, ...events]);
       setShowCreateForm(false);
       setNewEvent({
         title: "",

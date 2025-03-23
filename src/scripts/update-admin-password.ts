@@ -22,12 +22,12 @@ async function updateAdminPassword(email: string, newPassword: string) {
   try {
     const passwordHash = await hashPassword(newPassword);
 
-    const { data } = await graphqlRequest(UPDATE_ADMIN_PASSWORD, {
+    const response = await graphqlRequest(UPDATE_ADMIN_PASSWORD, {
       email,
       password_hash: passwordHash,
     });
 
-    console.log("Admin password updated successfully:", data);
+    console.log("Admin password updated successfully:", response);
   } catch (error) {
     console.error("Failed to update admin password:", error);
   }
