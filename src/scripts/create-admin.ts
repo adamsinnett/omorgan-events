@@ -22,12 +22,12 @@ async function createAdminUser(email: string, password: string) {
   try {
     const passwordHash = await hashPassword(password);
 
-    const { data } = await graphqlRequest(CREATE_ADMIN, {
+    const response = await graphqlRequest(CREATE_ADMIN, {
       email,
       password_hash: passwordHash,
     });
 
-    console.log("Admin user created successfully:", data);
+    console.log("Admin user created successfully:", response);
   } catch (error) {
     console.error("Failed to create admin user:", error);
   }

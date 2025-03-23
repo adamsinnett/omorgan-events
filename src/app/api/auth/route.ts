@@ -1,19 +1,6 @@
 import { NextResponse } from "next/server";
 import { SignJWT } from "jose";
 import bcrypt from "bcryptjs";
-import { config } from "dotenv";
-import { join } from "path";
-
-// Load environment variables from .env.local
-config({ path: join(process.cwd(), ".env.local") });
-
-// Verify environment variables are loaded
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL is not set in .env.local");
-  process.exit(1);
-}
-
-// Import database module after environment variables are loaded
 import { query } from "@/lib/db";
 
 const JWT_SECRET = new TextEncoder().encode(

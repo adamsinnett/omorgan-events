@@ -39,8 +39,8 @@ The application is built as a modern web application using Next.js for the front
 
 ### Hasura GraphQL Engine
 
-- **Database**: PostgreSQL (managed by Hasura)
-- **API**: GraphQL
+- **Database**: Neon PostgreSQL (managed by Hasura)
+- **API**: Hasura
 - **Authentication**: JWT-based with magic links
 
 ### Database Schema
