@@ -409,19 +409,30 @@ export default function EventPage({ params }: EventPageProps) {
           <TabsContent value="discussion">
             <Card>
               <CardContent className="pt-6">
-                <form onSubmit={handleSendMessage} className="space-y-4 mb-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Your Message</Label>
-                    <Textarea
-                      id="message"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Write a message..."
-                      required
-                    />
-                  </div>
-                  <Button type="submit">Send Message</Button>
-                </form>
+                {currentAttendee ? (
+                  <>
+                    <form
+                      onSubmit={handleSendMessage}
+                      className="space-y-4 mb-6"
+                    >
+                      <div className="space-y-2">
+                        <Label htmlFor="message">Your Message</Label>
+                        <Textarea
+                          id="message"
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          placeholder="Write a message..."
+                          required
+                        />
+                      </div>
+                    </form>
+                    <Button type="submit">Send Message</Button>
+                  </>
+                ) : (
+                  <p className="text-gray-500">
+                    Please RSVP in to send messages
+                  </p>
+                )}
 
                 <Separator className="my-6" />
 
